@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snakes and Ladders Game</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif, ; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #cfcfd4f6; }
+    .container { text-align: center; }
+    .board { display: grid; grid-template-columns: repeat(10, 50px); gap: 2px; margin: 20px auto; }
+    .cell { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; position: relative; font-size: 12px; }
+    .ladder { background-color: rgb(117, 243, 117); font-weight: bold; }
+    .snake { background-color: rgb(245, 137, 137); font-weight: bold; }
+    .player-token { width: 20px; height: 20px; border-radius: 50%; position: absolute; top: 5px; left: 5px; font-size: 14px; color: white; display: flex; align-items: center; justify-content: center; }
+    .player1 { background-color: rgb(241, 212, 47); }
+    .player2 { background-color: rgb(0, 92, 128); }
+    .controls { margin: 20px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Welcome to Snakes and Ladders</h1>
+  <div class="board" id="board"></div>
+  <div class="controls">
+    <button onclick="rollDice()">Roll Dice</button>
+    <p id="message">Player 1's Turn</p>
+  </div>
+</div>
+
+<script>
+// Game setup
+const boardSize = 10;
+const totalCells = boardSize * boardSize;
+const playerPositions = [0, 0]; // Starting positions for Player 1 and Player 2
+let currentPlayer = 0; // Player 1 starts
+const ladders = { 3: 22, 7: 39, 11: 26, 20: 29,39: 45, 52: 64, 77: 100, 82: 91};
+const snakes = { 27: 1, 21: 9, 17: 4, 19: 7, 34: 14, 56: 31, 75: 10, 84: 41, 99: 2 };
+
+// Build the board
+const boardDiv = document.getElementById("board");
+for (let i = 0; i < totalCells; i++) {
+  const cell = document.createElement("div");
+  cell.classList.add("cell");
+  cell.id = "cell-" + i;
+  cell.innerText = i + 1;
+  if (ladders[i + 1]) cell.classList.add("ladder");
+  if (snakes[i + 1]) cell.classList.add("snake");
+  boardDiv.appendChild(cell);
+}
+
+// Create player tokens
+const player1Token = document.createElement("div");
+player1Token.classList.add("player-token", "player1");
+player1Token.innerText = "1";
+document.getElementById("cell-0").appendChild(player1Token);
+
+const player2Token = document.createElement("div");
+player2Token.classList.add("player-token", "player2");
+player2Token.innerText = "2";
+document.getElementById("cell-0").appendChild(player2Token);
+
+function rollDice() {
+  const roll = Math.floor(Math.random() * 6) + 1;
+  let newPosition = playerPositions[currentPlayer] + roll;
+
+  // Check if player wins
+  if (newPosition >= totalCells - 1) {
+    alert(`Congratulations, Player ${currentPlayer + 1} Wins!`);
+    resetGame();
+    return;
+  }
+
+  // Check for ladders or snakes
+  if (ladders[newPosition]) {
+    newPosition = ladders[newPosition];
+  } else if (snakes[newPosition]) {
+    newPosition = snakes[newPosition];
+  }
+
+  updatePlayerPosition(newPosition);
+  switchPlayer();
+}
+
+function updatePlayerPosition(newPosition) {
+  const oldPosition = playerPositions[currentPlayer];
+  const token = currentPlayer === 0 ? player1Token : player2Token;
+
+  // Remove token from old position and place on new position
+  document.getElementById(`cell-${oldPosition}`).removeChild(token);
+  document.getElementById(`cell-${newPosition}`).appendChild(token);
+
+  // Update player position
+  playerPositions[currentPlayer] = newPosition;
+}
+
+function switchPlayer() {
+  currentPlayer = currentPlayer === 0 ? 1 : 0;
+  document.getElementById("message").innerText = `Player ${currentPlayer + 1}'s Turn`;
+}
+
+function resetGame() {
+  playerPositions[0] = playerPositions[1] = 0;
+  currentPlayer = 0;
+  document.getElementById("cell-0").appendChild(player1Token);
+  document.getElementById("cell-0").appendChild(player2Token);
+  document.getElementById("message").innerText = "Player 1's Turn";
+}
+</script>
+
+</body>
+</html>
